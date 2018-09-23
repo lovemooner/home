@@ -1,10 +1,13 @@
-package love.moon;
-import love.moon.common.HttpResponse;
+package love.moon.spider;
 
+import love.moon.common.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.net.ssl.*;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -13,17 +16,11 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
 
 public class HttpUtil {
+
+    public static final Logger LOG = LoggerFactory.getLogger(HttpUtil.class);
+
     private static final class DefaultTrustManager implements X509TrustManager {
         @Override
         public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
@@ -43,7 +40,7 @@ public class HttpUtil {
         SSLContext ctx = null;
         try {
             ctx = SSLContext.getInstance("TLS");
-            ctx.init(new KeyManager[0], new TrustManager[] { new DefaultTrustManager() }, new SecureRandom());
+            ctx.init(new KeyManager[0], new TrustManager[]{new DefaultTrustManager()}, new SecureRandom());
         } catch (KeyManagementException e) {
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
@@ -106,7 +103,7 @@ public class HttpUtil {
         String result = "";
         HttpResponse response = new HttpResponse();
         URL realURL = new URL(url);
-        HttpURLConnection conn =(HttpURLConnection) realURL.openConnection();
+        HttpURLConnection conn = (HttpURLConnection) realURL.openConnection();
         conn.setRequestProperty("accept", "*/*");
         conn.setRequestProperty("connection", "Keep-Alive");
         conn.setRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36");
@@ -125,4 +122,49 @@ public class HttpUtil {
         return response;
     }
 
+    public static String sendGet1(String url) throws Exception {
+        HttpResponse response = sendGet(url);
+        if (response.getCode() == 200) {
+            return response.getContent();
+        } else {
+            throw  new Exception("Fetch failed,code:"+ response.getCode()+",url"+url);
+        }
+    }
+
+    public static void downloadPicture(String url, String filename) throws IOException {
+
+        FileOutputStream fileOutputStream = null;
+        DataInputStream dataInputStream = null;
+        try {
+            dataInputStream = new DataInputStream(new URL(url).openStream());
+            fileOutputStream = new FileOutputStream(new File(Constants.SHARE_PATH + filename));
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = dataInputStream.read(buffer)) > 0) {
+                output.write(buffer, 0, length);
+            }
+            byte[] context = output.toByteArray();
+            fileOutputStream.write(output.toByteArray());
+        } finally {
+            if (dataInputStream != null) {
+                dataInputStream.close();
+            }
+            if (fileOutputStream != null) {
+                fileOutputStream.close();
+            }
+        }
+
+
+    }
+
+    public static void main(String[] args) {
+        String url = "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1538154970&di=4ec93cd028984cee6996fbf0b56be0d6&imgtype=jpg&er=1&src=http%3A%2F%2Fold.bz55.com%2Fuploads%2Fallimg%2F150911%2F139-150911103203.jpg";
+        String fileName = "test.jpg";
+        try {
+            downloadPicture(url, fileName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

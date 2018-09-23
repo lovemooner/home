@@ -3,7 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>wx</artifactId>
+        <artifactId>home</artifactId>
         <groupId>love.moon</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
@@ -67,7 +67,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>love.moon.aliyun.App</mainClass>
+                            <mainClass>love.moon.spider.Spider</mainClass>
                         </manifest>
                     </archive>
                     <outputDirectory> ${build.output.directory}/ndong</outputDirectory>

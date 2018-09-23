@@ -1,6 +1,5 @@
-package love.moon;
+package love.moon.spider;
 
-import love.moon.aliyun.App;
 import love.moon.util.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

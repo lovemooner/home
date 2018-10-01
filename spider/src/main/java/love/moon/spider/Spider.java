@@ -16,30 +16,30 @@ public class Spider {
     public static final Logger LOG = LoggerFactory.getLogger(Spider.class);
 
     public static void main(String[] args) {
-        new Thread(new Runnable() {
-            public void run() {
-                IParser parser = new MaomiParser();
-                List<Subject> subjects = parser.parse();
-                if (CollectionUtils.isEmpty(subjects)) {
-                    return;
-                }
-                String path=Constants.SHARE_PATH;
-                for (Subject subject : subjects) {
-                    List<Resource> resources= subject.getResources();
-                    String name=path+subject.getName();
-                    if (!CollectionUtils.isEmpty(resources)) {
-                        File file=new File(path+name);
-                        file.mkdir();
-                        for(int i=0;i<resources.size();i++){
-                            try {
-                                HttpUtil.downloadPicture(resources.get(i).getAddress(),name+"\\"+i);
-                            } catch (IOException e) {
-                                LOG.error(e.getMessage(),e);
-                            }
-
+        LOG.info("start Spider...");
+        new Thread(() -> {
+            IParser parser = new MaomiParser();
+            List<Subject> subjects = parser.parse();
+            if (CollectionUtils.isEmpty(subjects)) {
+                return;
+            }
+            String path = Constants.SHARE_PATH;
+            for (Subject subject : subjects) {
+                List<Resource> resources = subject.getResources();
+                String name = path + subject.getName();
+                if (!CollectionUtils.isEmpty(resources)) {
+                    File file = new File(name);
+                    file.mkdir();
+                    for (int i = 0; i < resources.size(); i++) {
+                        try {
+                            LOG.info("downloadPicture,url={}",resources.get(i).getAddress());
+                            HttpUtil.downloadPicture(resources.get(i).getAddress(), name + "\\" + i+".jpg");
+                        } catch (IOException e) {
+                            LOG.error(e.getMessage(), e);
                         }
 
                     }
+
                 }
             }
         }).start();

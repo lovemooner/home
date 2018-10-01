@@ -1,5 +1,6 @@
 package love.moon.spider.rule.maomi;
 
+import love.moon.RegUtil;
 import love.moon.spider.HttpUtil;
 import love.moon.spider.entity.Resource;
 import love.moon.spider.entity.Subject;
@@ -19,27 +20,13 @@ public class MaomiParser implements IParser {
 
     public static final Logger LOG = LoggerFactory.getLogger(MaomiParser.class);
 
-  static   String regEx_subject = "<a[^>]*>([^<]*)</a>";
-    String regEx_resouce = "((2[0-4]\\d|25[0-5]|[01]?\\d\\d?)\\.){3}(2[0-4]\\d|25[0-5]|[01]?\\d\\d?)";
+    String regEx_resource = "data-original=\".*?\"";
 
-
-    public static void main(String[] args) {
-        String content="<li>\n" +
-                "                                <a href=\"/tupian/16266.html\" title=\"女大学生绝对尤物，而且还露脸\" target=\"_blank\">\n" +
-                "                                    <img class=\"videopic lazy\" data-original=\"https://mmtp1.com/jjtq/zipai/03/01.jpg\" data-prefix=\"\" src=\"https://mmtp1.com/jjtq/zipai/03/01.jpg\" style=\"\">\n" +
-                "                                    <h3 title=\"女大学生绝对尤物，而且还露脸\" class=\"text-ellipsis\">女大学生绝对尤物，而且还露脸</h3>\n" +
-                "                                    <span class=\"down_date c_red\">2018-09-22 </span>\n" +
-                "                                </a>\n" +
-                "                            </li>";
-        Matcher m_subject = Pattern.compile(regEx_subject).matcher(content);
-        while (m_subject.find()) {
-            String str=m_subject.group();
-            System.out.println(str);
-        }
-    }
+    String regEx_subject = "<a href=\"/tupian/(\\d*)(.html).+?</a>";
 
 
     public List<Subject> parse() {
+        LOG.info("maomi Parser start parse");
         Properties properties = null;
         try {
             properties = PropertiesUtil.loadFromClassPath("spider.properties");
@@ -47,25 +34,26 @@ public class MaomiParser implements IParser {
             try {
                 List<Subject> subjects = new ArrayList<Subject>();
                 String content = HttpUtil.sendGet1(url);
-                System.out.println(content);
-                Matcher m_subject = Pattern.compile(regEx_subject).matcher(content);
-                while (m_subject.find()) {
-                    String link = m_subject.group();
-                    Subject subject = new Subject();
+                content=content.replace("\n","");
+
+                List<String> results=RegUtil.matchers(content,regEx_subject);
+                for (String result:results) {
+                    Subject subject = new Subject(result);
                     subjects.add(subject);
                 }
                 if (CollectionUtils.isEmpty(subjects)) return null;
-                Matcher m_resource = Pattern.compile(regEx_subject).matcher(content);
+                LOG.info("get subject ,size :{}",subjects.size());
+                String domain= properties.getProperty("url.maomiav.domain");
                 for (Subject subject : subjects) {
-                    content = HttpUtil.sendGet1(subject.getPageLink());
+                    String page = HttpUtil.sendGet1(domain+subject.getPageLink());
+                    List<String> pic_links= RegUtil.matchers(page,regEx_resource);
                     List<Resource> resources = new ArrayList<Resource>();
-                    subject.setResources(resources);
-                    while (m_resource.find()) {
-                        String link = m_subject.group();
+                    for (String pic_link:pic_links) {
                         Resource resource = new Resource();
-                        //TODO
+                        resource.setAddress(pic_link.replace("data-original=","").replace("\"",""));
                         resources.add(resource);
                     }
+                    subject.setResources(resources);
                 }
                 return subjects;
             } catch (IOException e) {

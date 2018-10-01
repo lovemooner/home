@@ -20,7 +20,7 @@ public class App {
 
     static {
         try {
-            properties = PropertiesUtil.load("config.properties");
+            properties = PropertiesUtil.loadFromClassPath("dns.properties");
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -38,7 +38,7 @@ public class App {
                 if (homeIP != null && latestIp.equals(homeIP.getIp())) {
                     ipService.updateIPTime(homeIP.getId());
                 } else {
-                    LOG.info("!!!!!!ip is charged!!!!!!");
+                    LOG.info("IP is charged!!!!!!");
                     ipService.saveLatestIP(latestIp);
                     Long recordId= dnsService.getTargetRecordId();
                     dnsService.updateDomainRecord(latestIp,recordId);

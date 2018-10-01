@@ -1,5 +1,7 @@
 package love.moon.spider.entity;
 
+import love.moon.RegUtil;
+
 import java.util.List;
 
 public class Subject {
@@ -9,6 +11,12 @@ public class Subject {
     private String publicTime;
 
     List<Resource> resources;
+
+    public Subject(String result){
+        this.name= RegUtil.matcher(result,"title=\".*?\"").replace("title=","").replace("\"","");
+        this.pageLink= RegUtil.matcher(result,"/tupian/(\\d*)(.html)");
+        this.publicTime= RegUtil.matcher(result,RegUtil.matcher(result,"\\d{4}-\\d{2}-\\d{2}"));
+    }
 
     public Long getId() {
         return id;

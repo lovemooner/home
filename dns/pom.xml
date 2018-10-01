@@ -8,7 +8,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>spider</artifactId>
+    <artifactId>dns</artifactId>
     <packaging>jar</packaging>
 
     <properties>
@@ -16,6 +16,19 @@
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-alidns</artifactId>
+            <version>2.0.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>aliyun-java-sdk-core</artifactId>
+            <optional>true</optional>
+            <version>3.7.1</version>
+        </dependency>
 
         <dependency>
             <groupId>love.moon</groupId>
@@ -38,7 +51,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${build.output.directory}/spider/lib</outputDirectory>
+                            <outputDirectory>${build.output.directory}/updateDNS/lib</outputDirectory>
                             <excludeTransitive>false</excludeTransitive>
                             <stripVersion>false</stripVersion>
                         </configuration>
@@ -53,10 +66,18 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>love.moon.spider.Spider</mainClass>
+                            <mainClass>love.moon.aliyun.App</mainClass>
                         </manifest>
                     </archive>
-                    <outputDirectory> ${build.output.directory}/spider</outputDirectory>
+                    <outputDirectory> ${build.output.directory}/updateDNS</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
                 </configuration>
             </plugin>
 

@@ -99,6 +99,15 @@ public class HttpUtil {
         return getBytesFromStream(httpsConn.getInputStream());
     }
 
+    public static String sendGet1(String url) throws Exception {
+        HttpResponse response = sendGet(url);
+        if (response.getCode() == 200) {
+            return response.getContent();
+        } else {
+            throw  new Exception("Fetch failed,code:"+ response.getCode()+",url"+url);
+        }
+    }
+
     public static HttpResponse sendGet(String url) throws IOException {
         String result = "";
         HttpResponse response = new HttpResponse();
@@ -122,22 +131,21 @@ public class HttpUtil {
         return response;
     }
 
-    public static String sendGet1(String url) throws Exception {
-        HttpResponse response = sendGet(url);
-        if (response.getCode() == 200) {
-            return response.getContent();
-        } else {
-            throw  new Exception("Fetch failed,code:"+ response.getCode()+",url"+url);
-        }
-    }
+
 
     public static void downloadPicture(String url, String filename) throws IOException {
 
         FileOutputStream fileOutputStream = null;
         DataInputStream dataInputStream = null;
         try {
-            dataInputStream = new DataInputStream(new URL(url).openStream());
-            fileOutputStream = new FileOutputStream(new File(Constants.SHARE_PATH + filename));
+            URL realURL = new URL(url);
+            HttpURLConnection conn = (HttpURLConnection) realURL.openConnection();
+            conn.setRequestProperty("accept", "*/*");
+            conn.setRequestProperty("connection", "Keep-Alive");
+            conn.setRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36");
+            conn.connect();
+            dataInputStream = new DataInputStream(conn.getInputStream());
+            fileOutputStream = new FileOutputStream(new File(filename));
             ByteArrayOutputStream output = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
             int length;
@@ -158,13 +166,31 @@ public class HttpUtil {
 
     }
 
-    public static void main(String[] args) {
-        String url = "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1538154970&di=4ec93cd028984cee6996fbf0b56be0d6&imgtype=jpg&er=1&src=http%3A%2F%2Fold.bz55.com%2Fuploads%2Fallimg%2F150911%2F139-150911103203.jpg";
-        String fileName = "test.jpg";
+    public static void downloadPicture1(String url, String filename) throws IOException {
+
+        FileOutputStream fileOutputStream = null;
+        DataInputStream dataInputStream = null;
         try {
-            downloadPicture(url, fileName);
-        } catch (IOException e) {
-            e.printStackTrace();
+            dataInputStream = new DataInputStream(new URL(url).openStream());
+            fileOutputStream = new FileOutputStream(new File(filename));
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = dataInputStream.read(buffer)) > 0) {
+                output.write(buffer, 0, length);
+            }
+            byte[] context = output.toByteArray();
+            fileOutputStream.write(output.toByteArray());
+        } finally {
+            if (dataInputStream != null) {
+                dataInputStream.close();
+            }
+            if (fileOutputStream != null) {
+                fileOutputStream.close();
+            }
         }
+
+
     }
+
 }

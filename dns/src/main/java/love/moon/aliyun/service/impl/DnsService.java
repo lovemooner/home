@@ -1,9 +1,9 @@
 package love.moon.aliyun.service.impl;
 
 import love.moon.aliyun.AbsDnsService;
+import love.moon.aliyun.service.IDnsService;
 import love.moon.aliyun.pojo.GetResult;
 import love.moon.aliyun.pojo.Record;
-import love.moon.aliyun.service.IDnsService;
 import love.moon.common.HttpResponse;
 import love.moon.util.HttpUtil;
 import love.moon.util.JsonUtil;
@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 

@@ -1,5 +1,7 @@
 package love.moon.aliyun;
 
+import com.aliyuncs.auth.AcsURLEncoder;
+import love.moon.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,9 +9,6 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
-
-import static com.aliyuncs.auth.AcsURLEncoder.percentEncode;
-import static love.moon.util.DateUtil.getISO8601Time;
 
 public class AbsDnsService {
     public static final Logger LOG = LoggerFactory.getLogger(AbsDnsService.class);
@@ -31,7 +30,7 @@ public class AbsDnsService {
         parameters.put("SignatureVersion", SIG_VER);
         parameters.put("AccessKeyId", ACCESS_KEY);
         parameters.put("Format", "JSON");
-        parameters.put("Timestamp", getISO8601Time());
+        parameters.put("Timestamp", DateUtil.getISO8601Time());
 
         return parameters;
     }
@@ -50,7 +49,7 @@ public class AbsDnsService {
         stringToSign.append(HttpMethod).append(SEPARATOR);
 
         try {
-            stringToSign.append(percentEncode("/")).append(SEPARATOR);
+            stringToSign.append(AcsURLEncoder.percentEncode("/")).append(SEPARATOR);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -60,8 +59,8 @@ public class AbsDnsService {
             // encode key, value
             try {
                 canonicalizedQueryString.append(SEPARATOR)
-                        .append(percentEncode(key)).append("=")
-                        .append(percentEncode(params.get(key)));
+                        .append(AcsURLEncoder.percentEncode(key)).append("=")
+                        .append(AcsURLEncoder.percentEncode(params.get(key)));
             } catch (UnsupportedEncodingException e) {
                 LOG.error(e.getMessage(),e);
             }
@@ -69,7 +68,7 @@ public class AbsDnsService {
 
         // encode canonicalizedQueryString
         try {
-            stringToSign.append(percentEncode(canonicalizedQueryString.toString().
+            stringToSign.append(AcsURLEncoder.percentEncode(canonicalizedQueryString.toString().
                     substring(1)));
         } catch (UnsupportedEncodingException e) {
             LOG.error(e.getMessage(),e);
@@ -83,7 +82,7 @@ public class AbsDnsService {
             httpRequest.append("/?");
             httpRequest.append(canonicalizedQueryString.toString().substring(1));
             httpRequest.append("&Signature=");
-            httpRequest.append(percentEncode(signature));
+            httpRequest.append(AcsURLEncoder.percentEncode(signature));
         } catch (Exception e) {
             e.printStackTrace();
         }
